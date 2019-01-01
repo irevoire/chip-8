@@ -443,9 +443,26 @@ static void chip8_opcode_CXNN(chip8_t *chip8, uint16_t *opcode)
 /* Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen */
 static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 {
-	(void) chip8;
-	(void) opcode;
-	// TODO
+	unsigned char X = chip8->V[(*opcode & 0x0F00) >> 8];
+	unsigned char Y = chip8->V[(*opcode & 0x00F0) >> 4];
+	uint16_t height = *opcode & 0x000F;
+	uint16_t pixel;
+
+	chip8->V[0xF] = 0;
+	for (int s_y = 0; s_y < height; s_y++)
+	{
+		pixel = chip8->memory[chip8->I + s_y];
+		for(int s_x = 0; s_x < 8; s_x++)
+		{
+			if((pixel & (0x80 >> s_x)) != 0)
+			{
+				if(chip8->gfx[(X + s_x + ((Y + s_y) * 64))] == 1)
+					chip8->V[0xF] = 1;
+				chip8->gfx[X + s_x + ((Y + s_y) * 64)] ^= 1;
+			}
+		}
+	}
+	chip8->pc += 2;
 }
 
 /* Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) */
@@ -486,7 +503,7 @@ static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
 
 	char key_pressed = 0;
 
-	for(unsigned char i = 0; i < 16; ++i)
+	for(unsigned char i = 0; i < 16; i++)
 	{
 		if(chip8->key[i] != 0)
 		{
