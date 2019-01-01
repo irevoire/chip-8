@@ -12,7 +12,7 @@ window_t *create_window(int width, int height)
 	window->window = SDL_CreateWindow("CHIP-8",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			width, height,
-			0);
+			SDL_WINDOW_RESIZABLE);
 	if (window->window == NULL)
 		handle_SDL_Error("Could not create window");
 
@@ -44,13 +44,23 @@ void window_clear(window_t *window)
 
 void update_window(window_t *win, const unsigned char *gfx)
 {
+	int real_height, real_width;
+	int h_f, w_f; // enlarge factor
+
+	SDL_GetWindowSize(win->window, &real_height, &real_width);
+
+	h_f = real_height / win->h;
+	w_f = real_width / win->w;
+
 	for (int y = 0; y < win->h; y++)
 	{
 		for (int x = 0; x < win->w; x++)
 		{
+			SDL_Rect rect = {x, y, h_f, w_f};
+
 			if (gfx[x + y * 64] == 0)
 				continue;
-			SDL_RenderDrawPoint(win->renderer, x, y);
+			SDL_RenderFillRect(win->renderer, &rect);
 		}
 	}
 	SDL_RenderPresent(win->renderer);

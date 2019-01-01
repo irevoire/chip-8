@@ -34,8 +34,9 @@ int main(int argc, char **argv)
 	chip8 = chip8_init();
 
 	// Set up render system and register input callbacks
-	chip8->window = create_window(64, 32);
-	printf("cacaprout\n");
+	chip8->window = create_window(640, 320);
+
+	SDL_SetRenderDrawColor(chip8->window->renderer, 255, 0, 0, 255);
 
 	// Load the game into the memory
 	chip8_load_game(chip8, fd);
