@@ -200,6 +200,8 @@ static void chip8_handle_opcode(chip8_t *chip8)
 	else if ((*opcode & 0xF0FF) == 0xF018)
 		chip8_opcode_FX18(chip8, opcode);
 	else if ((*opcode & 0xF0FF) == 0xF01E)
+		chip8_opcode_FX1E(chip8, opcode);
+	else if ((*opcode & 0xF0FF) == 0xF029)
 		chip8_opcode_FX29(chip8, opcode);
 	else if ((*opcode & 0xF0FF) == 0xF033)
 		chip8_opcode_FX33(chip8, opcode);
@@ -212,16 +214,6 @@ static void chip8_handle_opcode(chip8_t *chip8)
 		printf("Unknown opcode: 0x%.4X\n", *opcode);
 		exit(1);
 	}
-
-	/*
-	switch(*opcode & 0xF000)
-	{
-		case 0xA000: 
-			chip8_opcode_ANNN(chip8, opcode);
-			break;
-		default:
-	}
-	*/
 }
 
 /* Calls RCA 1802 program at address NNN. Not necessary for most ROMs. */
@@ -248,7 +240,7 @@ static void chip8_opcode_00EE(chip8_t *chip8, uint16_t *opcode)
 	(void) opcode;
 
 	chip8->sp--;
-	chip8->pc = chip8->stack[sp];
+	chip8->pc = chip8->stack[chip8->sp];
 	chip8->pc += 2;
 }
 
@@ -370,11 +362,11 @@ static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 	unsigned char Y = (*opcode & 0x00F0) >> 4;
 
-	if(chip8->[X] > chip8->[Y]) 
-		chip8->[0xF] = 0; // there is a borrow
+	if(chip8->V[X] > chip8->V[Y]) 
+		chip8->V[0xF] = 0; // there is a borrow
 	else 
-		chip8->[0xF] = 1;					
-	chip8->[Y] -= chip8->[X];
+		chip8->V[0xF] = 1;					
+	chip8->V[Y] -= chip8->V[X];
 	chip8->pc += 2;
 }
 
@@ -451,6 +443,8 @@ static void chip8_opcode_CXNN(chip8_t *chip8, uint16_t *opcode)
 /* Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen */
 static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 {
+	(void) chip8;
+	(void) opcode;
 	// TODO
 }
 
@@ -459,7 +453,7 @@ static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
 {
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 
-	if(chip8->key[V[X]] != 0)
+	if(chip8->key[chip8->V[X]] != 0)
 		chip8->pc += 4;
 	else
 		chip8->pc += 2;
@@ -470,7 +464,7 @@ static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
 {
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 
-	if(chip8->key[V[X]] == 0)
+	if(chip8->key[chip8->V[X]] == 0)
 		chip8->pc += 4;
 	else
 		chip8->pc += 2;
@@ -492,17 +486,17 @@ static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
 
 	char key_pressed = 0;
 
-	for(char i = 0; i < 16; ++i)
+	for(unsigned char i = 0; i < 16; ++i)
 	{
 		if(chip8->key[i] != 0)
 		{
 			chip8->V[X] = i;
-			key_pressed = true;
+			key_pressed = 1;
 		}
 	}
 
 	// If we didn't received a keypress, skip this cycle and try again.
-	if(!key_pressed)
+	if(key_pressed == 0)
 		return;
 
 	chip8->pc += 2;
