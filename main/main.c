@@ -30,12 +30,13 @@ int main(int argc, char **argv)
 	else
 		usage();
 
-	// Set up render system and register input callbacks
-	create_window(64, 32);
-//	setupInput();
-
-	// Initialize the Chip8 system and load the game into the memory
+	// Initialize the Chip8 system
 	chip8 = chip8_init();
+
+	// Set up render system and register input callbacks
+	chip8->window = create_window(64, 32);
+
+	// Load the game into the memory
 	chip8_load_game(chip8, fd);
 
 	// Emulation loop

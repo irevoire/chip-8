@@ -3,20 +3,18 @@
 
 #include <SDL.h>
 
-struct window_s {
+typedef struct window_s {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
 	int w;
 	int h;
-};
+} window_t;
 
-typedef struct window_s* window_t;
+window_t *create_window(int width, int height);
 
-extern window_t window;
+void destroy_window(window_t *window);
 
-void create_window(int width, int height);
-
-void destroy_window(void);
+void window_clear(window_t *window);
 
 #endif /* _WINDOW_H_ */

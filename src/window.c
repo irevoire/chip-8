@@ -3,11 +3,9 @@
 #include "window.h"
 #include "SDL_utils.h"
 
-window_t window = NULL;
-
-void create_window(int width, int height)
+window_t *create_window(int width, int height)
 {
-	window = malloc (sizeof *window);
+	window_t *window = malloc(sizeof(*window));
 	if (SDL_Init(SDL_INIT_VIDEO))
 		handle_SDL_Error("Unable to initialize SDL");
 
@@ -27,12 +25,40 @@ void create_window(int width, int height)
 
 	window->w = width;
 	window->h = height;
+
+	return window;
 }
 
-void destroy_window()
+void destroy_window(window_t *window)
 {
 	SDL_DestroyRenderer(window->renderer);
 	SDL_DestroyWindow(window->window);
 
 	free(window);
+}
+
+static int handle_event()
+{
+	SDL_Event event;
+
+	while(SDL_PollEvent(&event) != 0)
+	{
+		switch (event.type)
+		{
+			case SDL_QUIT:
+				return 1;
+			case SDL_KEYDOWN:
+				break;
+			default:
+				/* "Event not yet implemented */
+				break;
+		}
+	}
+
+	return 0;
+}
+
+void window_clear(window_t *window)
+{
+	SDL_RenderClear(window->renderer);
 }

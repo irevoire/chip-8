@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "window.h"
+
 extern unsigned char chip8_fontset[];
 
 typedef struct chip8_s {
@@ -20,6 +22,8 @@ typedef struct chip8_s {
 
 	unsigned char key[16]; /* which key are pressed */
 	unsigned char gfx[64 * 32]; /* pixel array */
+
+	window_t *window;
 } chip8_t;
 
 /*!
