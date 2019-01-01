@@ -35,6 +35,7 @@ int main(int argc, char **argv)
 
 	// Set up render system and register input callbacks
 	chip8->window = create_window(64, 32);
+	printf("cacaprout\n");
 
 	// Load the game into the memory
 	chip8_load_game(chip8, fd);
@@ -46,14 +47,11 @@ int main(int argc, char **argv)
 		if (chip8_emulate_cycle(chip8))
 			break; // error
 
-		/*
-		// If the draw flag is set, update the screen
-		if(myChip8.drawFlag)
-			drawGraphics();
+		update_window(chip8->window, chip8->gfx);
 
 		// Store key press state (Press and Release)
-		myChip8.setKeys();
-		*/
+		if (handle_event(chip8->key))
+			break;
 	}
 
 	chip8_free(chip8);

@@ -37,7 +37,27 @@ void destroy_window(window_t *window)
 	free(window);
 }
 
-static int handle_event()
+void window_clear(window_t *window)
+{
+	SDL_RenderClear(window->renderer);
+}
+
+void update_window(window_t *win, const unsigned char *gfx)
+{
+	for (int y = 0; y < win->h; y++)
+	{
+		for (int x = 0; x < win->w; x++)
+		{
+			if (gfx[x + y * 64] == 0)
+				continue;
+			SDL_RenderDrawPoint(win->renderer, x, y);
+		}
+	}
+	SDL_RenderPresent(win->renderer);
+
+}
+
+int handle_event(unsigned char *keyboard)
 {
 	SDL_Event event;
 
@@ -58,7 +78,3 @@ static int handle_event()
 	return 0;
 }
 
-void window_clear(window_t *window)
-{
-	SDL_RenderClear(window->renderer);
-}

@@ -17,4 +17,8 @@ void destroy_window(window_t *window);
 
 void window_clear(window_t *window);
 
+void update_window(window_t *win, const unsigned char *gfx);
+
+int handle_event(unsigned char *keyboard);
+
 #endif /* _WINDOW_H_ */
