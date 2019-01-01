@@ -15,6 +15,8 @@ static void usage(void)
 int main(int argc, char **argv)
 {
 	FILE *fd = NULL;
+	unsigned int time;
+
 	// Get a filedescriptor to the game
 	if (argc == 1)
 		fd = stdin;
@@ -39,18 +41,19 @@ int main(int argc, char **argv)
 	// Load the game into the memory
 	chip8_load_game(chip8, fd);
 
-	// Emulation loop
+	time = SDL_GetTicks();
 	while(1)
 	{
-		// Emulate one cycle
 		if (chip8_emulate_cycle(chip8))
-			break; // error
+			break;
 
 		update_window(chip8->window, chip8->gfx);
 
-		// Store key press state (Press and Release)
 		if (handle_event(chip8->key))
 			break;
+		if ((time = (SDL_GetTicks() - time)) < 20)
+			SDL_Delay(time);
+		time = SDL_GetTicks();
 	}
 
 	chip8_free(chip8);
