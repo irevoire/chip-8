@@ -6,7 +6,7 @@
 
 #include "window.h"
 
-extern unsigned char chip8_fontset[];
+extern const unsigned char chip8_fontset[];
 
 typedef struct chip8_s {
 	uint16_t opcode; /* all the instruction are on two bytes */

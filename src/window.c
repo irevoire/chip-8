@@ -11,7 +11,7 @@ window_t *create_window(int width, int height)
 
 	window->window = SDL_CreateWindow("CHIP-8",
 			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			width, height,
+			800, 600,
 			SDL_WINDOW_RESIZABLE);
 	if (window->window == NULL)
 		handle_SDL_Error("Could not create window");
@@ -47,19 +47,25 @@ void update_window(window_t *win, const unsigned char *gfx)
 	int real_height, real_width;
 	int h_f, w_f; // enlarge factor
 
+	SDL_SetRenderDrawColor(win->renderer, 50, 50, 30, 255);
+	SDL_RenderClear(win->renderer);
 	SDL_GetWindowSize(win->window, &real_height, &real_width);
 
 	h_f = real_height / win->h;
 	w_f = real_width / win->w;
 
+	printf("hf %d wf %d\n", h_f, w_f);
+
 	for (int y = 0; y < win->h; y++)
 	{
 		for (int x = 0; x < win->w; x++)
 		{
-			SDL_Rect rect = {x, y, h_f, w_f};
+			//SDL_Rect rect = {x * h_f, y * h_f, h_f, w_f};
+			SDL_Rect rect = {x * 5, y * 5, 5, 5};
 
 			if (gfx[x + y * 64] == 0)
 				continue;
+			SDL_SetRenderDrawColor(win->renderer, 230, 255, 255, 255);
 			SDL_RenderFillRect(win->renderer, &rect);
 		}
 	}
