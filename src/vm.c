@@ -4,7 +4,7 @@
 #include "window.h"
 #include "vm.h"
 
-unsigned char chip8_fontset[] =
+const unsigned char chip8_fontset[] =
 {
   0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
   0x20, 0x60, 0x20, 0x20, 0x70, // 1
