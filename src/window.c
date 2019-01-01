@@ -67,57 +67,57 @@ void update_window(window_t *win, const unsigned char *gfx)
 
 }
 
-static void handle_keyboard(unsigned char *keyboard, int sym)
+static void handle_keyboard(unsigned char *keyboard, int sym, unsigned char value)
 {
 	switch (sym)
 	{
 		case SDLK_1:
-			keyboard[0] = 1;
+			keyboard[0] = value;
 			break;
 		case SDLK_2:
-			keyboard[1] = 1;
+			keyboard[1] = value;
 			break;
 		case SDLK_3:
-			keyboard[2] = 1;
+			keyboard[2] = value;
 			break;
 		case SDLK_4:
-			keyboard[3] = 1;
+			keyboard[3] = value;
 			break;
 		case SDLK_a:
-			keyboard[4] = 1;
+			keyboard[4] = value;
 			break;
 		case SDLK_z:
-			keyboard[5] = 1;
+			keyboard[5] = value;
 			break;
 		case SDLK_e:
-			keyboard[6] = 1;
+			keyboard[6] = value;
 			break;
 		case SDLK_r:
-			keyboard[7] = 1;
+			keyboard[7] = value;
 			break;
 		case SDLK_q:
-			keyboard[8] = 1;
+			keyboard[8] = value;
 			break;
 		case SDLK_s:
-			keyboard[9] = 1;
+			keyboard[9] = value;
 			break;
 		case SDLK_d:
-			keyboard[10] = 1;
+			keyboard[10] = value;
 			break;
 		case SDLK_f:
-			keyboard[11] = 1;
+			keyboard[11] = value;
 			break;
 		case SDLK_w:
-			keyboard[12] = 1;
+			keyboard[12] = value;
 			break;
 		case SDLK_x:
-			keyboard[13] = 1;
+			keyboard[13] = value;
 			break;
 		case SDLK_c:
-			keyboard[14] = 1;
+			keyboard[14] = value;
 			break;
 		case SDLK_v:
-			keyboard[15] = 1;
+			keyboard[15] = value;
 			break;
 	}
 }
@@ -133,7 +133,10 @@ int handle_event(unsigned char *keyboard)
 			case SDL_QUIT:
 				return 1;
 			case SDL_KEYDOWN:
-				handle_keyboard(keyboard, event.key.keysym.sym);
+				handle_keyboard(keyboard, event.key.keysym.sym, 1);
+				break;
+			case SDL_KEYUP:
+				handle_keyboard(keyboard, event.key.keysym.sym, 0);
 				break;
 			default:
 				/* "Event not yet implemented */
