@@ -138,7 +138,7 @@ static void chip8_handle_opcode(chip8_t *chip8)
 	// get the current opcode
 //	memcpy(opcode, chip8->memory + chip8->pc, sizeof(*opcode));
 
-	*opcode = chip8->memory[chip8->pc] << 8 | chip8->memory[chip8->pc + 1];
+	*opcode = (uint16_t) (chip8->memory[chip8->pc] << 8 | chip8->memory[chip8->pc + 1]);
 
 	// Decode the opcode
 	if (*opcode == 0x00EE)
@@ -216,8 +216,6 @@ static void chip8_handle_opcode(chip8_t *chip8)
 		printf("Unknown opcode: 0x%.4X\n", *opcode);
 		exit(1);
 	}
-	printf("Opcode: 0x%.4X was executed\n", *opcode);
-	printf("Current position is: 0x%.4X\n", chip8->pc);
 }
 
 /* Calls RCA 1802 program at address NNN. Not necessary for most ROMs. */
@@ -426,7 +424,6 @@ static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
 // Sets I to the address NNN
 static void chip8_opcode_ANNN(chip8_t *chip8, uint16_t *opcode)
 {
-	printf("Foud ANNN\n");
 	chip8->I = *opcode & 0x0FFF;
 	chip8->pc += 2;
 }
