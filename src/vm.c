@@ -136,11 +136,9 @@ static void chip8_handle_opcode(chip8_t *chip8)
 {
 	uint16_t *opcode = &chip8->opcode;
 	// get the current opcode
-//	memcpy(opcode, chip8->memory + chip8->pc, sizeof(*opcode));
 
 	*opcode = (uint16_t) (chip8->memory[chip8->pc] << 8 | chip8->memory[chip8->pc + 1]);
 
-	// Decode the opcode
 	if (*opcode == 0x00EE)
 		chip8_opcode_00EE(chip8, opcode);
 	else if (*opcode == 0x00E0)
@@ -569,7 +567,7 @@ static void chip8_opcode_FX33(chip8_t *chip8, uint16_t *opcode)
 
 	chip8->memory[chip8->I]     = chip8->V[X] / 100;
 	chip8->memory[chip8->I + 1] = (chip8->V[X] / 10) % 10;
-	chip8->memory[chip8->I + 2] = (chip8->V[X] % 100) % 10;
+	chip8->memory[chip8->I + 2] = chip8->V[X] % 10;
 	chip8->pc += 2;
 }
 
