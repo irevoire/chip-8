@@ -90,7 +90,7 @@ int chip8_emulate_cycle(chip8_t *chip8)
 	if(chip8->sound_timer > 0)
 	{
 		if(chip8->sound_timer == 1)
-			printf("BEEP!\n");
+			printf("\a");
 		chip8->sound_timer--;
 	}
 	return 0;
@@ -450,16 +450,17 @@ static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 	uint16_t pixel;
 
 	chip8->V[0xF] = 0;
-	for (int s_y = 0; s_y < height; s_y++)
+	for (unsigned char s_y = 0; s_y < height; s_y++)
 	{
 		pixel = chip8->memory[chip8->I + s_y];
-		for(int s_x = 0; s_x < 8; s_x++)
+		for(unsigned char s_x = 0; s_x < 8; s_x++)
 		{
 			if((pixel & (0x80 >> s_x)) != 0)
 			{
-				if(chip8->gfx[(X + s_x + ((Y + s_y) * 64))] == 1)
+				size_t pos = X + s_x + ((Y + s_y) * 64);
+				if(chip8->gfx[pos] == 1)
 					chip8->V[0xF] = 1;
-				chip8->gfx[X + s_x + ((Y + s_y) * 64)] ^= 1;
+				chip8->gfx[pos] ^= 1;
 			}
 		}
 	}
