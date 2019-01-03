@@ -7,13 +7,20 @@ BINDIR := bin
 
 export # allow all variables to be inclued in the sub Makefile
 
+.PHONY: clean test all term sdl
+
 all:
 	@for dir in ${SUBDIR} ; do \
 		echo "[*] Building subdir $$dir" ; \
 		$(MAKE) -C $$dir || exit ;\
 	done
 
-.PHONY: clean test all
+term: GFX=TERM
+term: all
+
+sdl: GFX=SDL
+sdl: all
+
 
 clean:
 	@echo "[*] Cleaning"
