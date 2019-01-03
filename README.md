@@ -1,4 +1,4 @@
 Chip-8 Emulator
 
-Followed this tutorial :
-http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
+ref for the emulator:
+http://mattmik.com/files/chip8/mastering/chip8.html
