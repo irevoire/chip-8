@@ -18,6 +18,9 @@ all:
 term: GFX=TERM
 term: all
 
+ncurses: GFX=NCURSES
+ncurses: all
+
 sdl: GFX=SDL
 sdl: all
 
