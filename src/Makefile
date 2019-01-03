@@ -9,14 +9,18 @@ OBJ    := $(addprefix ${OBJDIR}/, $(patsubst %.c,%.o,$(SRC)))
 
 CFLAGS += -I${BASE}/include
 
-all: ${OBJ}
+.PHONY: clean all gfx
+
+all: ${OBJ} gfx
 
 ${OBJDIR}/%.o: %.c ${HDR} ${COMMON}
-	@echo "[*] Building subdir gfx/$$GFX"
-	@$(MAKE) -C gfx/${GFX}
 	@mkdir -p ${OBJDIR}
 	@echo "[*] Building $@"
 	@${CC} -o $@ -c $< ${CFLAGS}
+
+gfx:
+	@echo "[*] Building subdir gfx/$$GFX"
+	@$(MAKE) -C gfx/${GFX}
 
 clean:
 	@echo "[*] Cleaning"
