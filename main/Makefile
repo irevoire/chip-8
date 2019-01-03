@@ -8,13 +8,14 @@ OBJDIR   := ${BASE}/obj/main
 OBJ      := $(addprefix ${OBJDIR}/, $(patsubst %.c,%.o,$(SRC)))
 VM_OBJ   := ${wildcard  ${BASE}/obj/src/*.o}
 GFX_OBJ  := ${wildcard  ${BASE}/obj/${GFX}/*.o}
+GFX_COMMON := ${BASE}/src/gfx/${GFX}/common.mk
 BINDIR   := ${BASE}/bin
 EXE      := ${BINDIR}/main
 
 CFLAGS += -I${BASE}/include
 
-ifeq (${GFX}, SDL)
-LDFLAGS += $(shell sdl2-config --libs)
+ifneq (,$(wildcard ${GFX_COMMON}))
+	include ${GFX_COMMON}
 endif
 
 all: ${EXE}

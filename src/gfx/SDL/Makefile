@@ -8,9 +8,8 @@ OBJDIR := ${BASE}/obj/${GFX}
 OBJ    := $(addprefix ${OBJDIR}/, $(patsubst %.c,%.o,$(SRC)))
 
 CFLAGS += -I${BASE}/include
-CFLAGS += $(shell sdl2-config --cflags)
 
-LDFLAGS += $(shell sdl2-config --libs)
+include common.mk
 
 all: ${OBJ}
 
