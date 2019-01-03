@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "vm.h"
 #include "window.h"
@@ -15,7 +16,6 @@ static void usage(void)
 int main(int argc, char **argv)
 {
 	FILE *fd = NULL;
-	unsigned int time;
 
 	// Get a filedescriptor to the game
 	if (argc == 1)
@@ -41,7 +41,6 @@ int main(int argc, char **argv)
 	// Load the game into the memory
 	chip8_load_game(chip8, fd);
 
-	time = SDL_GetTicks();
 	while(1)
 	{
 		if (chip8_emulate_cycle(chip8))
@@ -51,9 +50,15 @@ int main(int argc, char **argv)
 
 		if (handle_event(chip8->key))
 			break;
-		if ((time = (SDL_GetTicks() - time)) < 20)
-			SDL_Delay(time);
+
+		/* TODO without SDL
+		if ((time = (get_time() - time)) < 2000)
+			nanosleep(
+			usleep(time / 1000);
+		else
+			printf("Too slow : %ld\n", time);
 		time = SDL_GetTicks();
+		*/
 	}
 
 	chip8_free(chip8);
