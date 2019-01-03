@@ -1,20 +1,25 @@
 BASE     := ..
 COMMON   := ${BASE}/common.mk
+include ${COMMON}
+
 SRC      := $(wildcard  *.c)
 HDR      := $(wildcard  ${BASE}/include/*.h)
-OBJDIR   := ${BASE}/obj/regress
+OBJDIR   := ${BASE}/obj/main
 OBJ      := $(addprefix ${OBJDIR}/, $(patsubst %.c,%.o,$(SRC)))
-STIF_OBJ := ${wildcard  ${BASE}/obj/src/*.o}
+VM_OBJ   := ${wildcard  ${BASE}/obj/src/*.o}
+GFX_OBJ  := ${wildcard  ${BASE}/obj/${GFX}/*.o}
 BINDIR   := ${BASE}/bin
 EXE      := ${BINDIR}/main
 
-include ${COMMON}
+CFLAGS += -I${BASE}/include
 
-CFLAGS  += -I${BASE}/include
+ifeq (${GFX}, SDL)
+LDFLAGS += $(shell sdl2-config --libs)
+endif
 
 all: ${EXE}
 
-${EXE}: ${OBJ} ${STIF_OBJ}
+${EXE}: ${OBJ} ${VM_OBJ} ${GFX_OBJ}
 	@mkdir -p ${BINDIR}
 	@${CC} -o $@ $^ ${LDFLAGS}
 

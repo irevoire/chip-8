@@ -3,6 +3,9 @@
 # Use gcc by default
 CC ?= gcc
 
+# Use SDL by default
+GFX ?= SDL
+
 # Speed up the build
 NPROC_EXISTS := $(shell which nproc)
 ifeq ($(NPROC_EXISTS),)
@@ -19,7 +22,5 @@ WARNINGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
             -Wconversion -Wstrict-prototypes
 CFLAGS ?=
 CFLAGS += -g -std=gnu99 $(WARNINGS)
-CFLAGS += $(shell sdl2-config --cflags)
 
 LDFLAGS ?=
-LDFLAGS += $(shell sdl2-config --libs)

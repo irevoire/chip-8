@@ -3,9 +3,17 @@
 #include "window.h"
 #include "SDL_utils.h"
 
+struct window_s {
+	SDL_Window *window;
+	SDL_Renderer *renderer;
+
+	int w;
+	int h;
+};
+
 window_t *create_window(int width, int height)
 {
-	window_t *window = malloc(sizeof(*window));
+	struct window_s *window = malloc(sizeof(*window));
 	if (SDL_Init(SDL_INIT_VIDEO))
 		handle_SDL_Error("Unable to initialize SDL");
 
@@ -31,21 +39,24 @@ window_t *create_window(int width, int height)
 
 void destroy_window(window_t *window)
 {
-	SDL_DestroyRenderer(window->renderer);
-	SDL_DestroyWindow(window->window);
+	struct window_s *win = window;
+	SDL_DestroyRenderer(win->renderer);
+	SDL_DestroyWindow(win->window);
 
-	free(window);
+	free(win);
 }
 
 void window_clear(window_t *window)
 {
-	SDL_RenderClear(window->renderer);
+	struct window_s *win = window;
+	SDL_RenderClear(win->renderer);
 }
 
-void update_window(window_t *win, const unsigned char *gfx)
+void update_window(window_t *window, const unsigned char *gfx)
 {
 	int real_height, real_width;
 	int h_f, w_f; // enlarge factor
+	struct window_s *win = window;
 
 	SDL_SetRenderDrawColor(win->renderer, 50, 50, 30, 255);
 	SDL_RenderClear(win->renderer);

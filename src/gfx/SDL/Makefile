@@ -1,19 +1,20 @@
-BASE   := ..
+BASE   := ../../..
 COMMON := ${BASE}/common.mk
 include ${COMMON}
 
 SRC    := $(wildcard *.c)
 HDR    := $(wildcard ${BASE}/include/*.h)
-OBJDIR := ${BASE}/obj/src
+OBJDIR := ${BASE}/obj/${GFX}
 OBJ    := $(addprefix ${OBJDIR}/, $(patsubst %.c,%.o,$(SRC)))
 
 CFLAGS += -I${BASE}/include
+CFLAGS += $(shell sdl2-config --cflags)
+
+LDFLAGS += $(shell sdl2-config --libs)
 
 all: ${OBJ}
 
 ${OBJDIR}/%.o: %.c ${HDR} ${COMMON}
-	@echo "[*] Building subdir gfx/$$GFX"
-	@$(MAKE) -C gfx/${GFX}
 	@mkdir -p ${OBJDIR}
 	@echo "[*] Building $@"
 	@${CC} -o $@ -c $< ${CFLAGS}
