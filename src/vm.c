@@ -369,7 +369,7 @@ static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
 		chip8->V[0xF] = 0; // there is a borrow
 	else 
 		chip8->V[0xF] = 1;					
-	chip8->V[Y] -= chip8->V[X];
+	chip8->V[X] -= chip8->V[Y];
 	chip8->pc += 2;
 }
 
@@ -458,10 +458,10 @@ static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 		{
 			if((pixel & (0x80 >> s_x)) != 0)
 			{
-				size_t pos = X + s_x + ((Y + s_y) * 64);
+				size_t pos = (X + s_x + ((Y + s_y) * 64)) % 2048;
 				if(chip8->gfx[pos] == 1)
 					chip8->V[0xF] = 1;
-				chip8->gfx[pos] ^= 1;
+				chip8->gfx[pos] = ~chip8->gfx[pos] ;
 			}
 		}
 	}
