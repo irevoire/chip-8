@@ -365,10 +365,10 @@ static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 	unsigned char Y = (*opcode & 0x00F0) >> 4;
 
-	if(chip8->V[X] > chip8->V[Y]) 
-		chip8->V[0xF] = 0; // there is a borrow
-	else 
-		chip8->V[0xF] = 1;					
+	if(chip8->V[Y] > chip8->V[X])
+		chip8->V[0xF] = 1; // there is a borrow
+	else
+		chip8->V[0xF] = 0;
 	chip8->V[X] -= chip8->V[Y];
 	chip8->pc += 2;
 }
