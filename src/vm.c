@@ -217,14 +217,6 @@ static void chip8_handle_opcode(chip8_t *chip8)
 	}
 }
 
-/* Calls RCA 1802 program at address NNN. Not necessary for most ROMs. */
-static void chip8_opcode_0NNN(chip8_t *chip8, uint16_t *opcode)
-{
-	// remove ununsed parameters warnings
-	(void) chip8;
-	(void) opcode;
-}
-
 /* Clears the screen. */
 static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode)
 {
@@ -234,6 +226,7 @@ static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode)
 	memset(chip8->gfx, 0, sizeof(chip8->gfx));
 
 	window_clear(chip8->window);
+	chip8->pc += 2;
 }
 
 /* Returns from a subroutine. */
@@ -244,6 +237,15 @@ static void chip8_opcode_00EE(chip8_t *chip8, uint16_t *opcode)
 
 	chip8->sp--;
 	chip8->pc = chip8->stack[chip8->sp];
+	chip8->pc += 2;
+}
+
+/* Calls RCA 1802 program at address NNN. Not necessary for most ROMs. */
+static void chip8_opcode_0NNN(chip8_t *chip8, uint16_t *opcode)
+{
+	// remove ununsed parameters warnings
+	(void) opcode;
+
 	chip8->pc += 2;
 }
 
@@ -267,18 +269,16 @@ static void chip8_opcode_2NNN(chip8_t *chip8, uint16_t *opcode)
 static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode)
 {
 	if(chip8->V[(*opcode & 0x0F00) >> 8] == (*opcode & 0x00FF))
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 /* Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode)
 {
 	if(chip8->V[(*opcode & 0x0F00) >> 8] != (*opcode & 0x00FF))
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 /* Skips the next instruction if VX equals VY. (Usually the next instruction is a jump to skip a code block) */
@@ -286,9 +286,8 @@ static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode)
 {
 	if(chip8->V[(*opcode & 0x0F00) >> 8] // VX
 			== chip8->V[(*opcode & 0x00F0) >> 4]) // VY
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 /* Sets VX to NN. */
@@ -390,9 +389,9 @@ static void chip8_opcode_8XY7(chip8_t *chip8, uint16_t *opcode)
 	unsigned char Y = (*opcode & 0x00F0) >> 4;
 
 	if(chip8->V[X] > chip8->V[Y])
-		chip8->V[0xF] = 0;
-	else
 		chip8->V[0xF] = 1;
+	else
+		chip8->V[0xF] = 0;
 
 	chip8->V[X] = chip8->V[Y] - chip8->V[X];
 	chip8->pc += 2;
@@ -415,9 +414,8 @@ static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
 	unsigned char Y = (*opcode & 0x00F0) >> 4;
 
 	if(chip8->V[X] != chip8->V[Y])
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 // Sets I to the address NNN
@@ -474,9 +472,8 @@ static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 
 	if(chip8->key[chip8->V[X]] != 0)
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 /* Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block) */
@@ -485,9 +482,8 @@ static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
 	unsigned char X = (*opcode & 0x0F00) >> 8;
 
 	if(chip8->key[chip8->V[X]] == 0)
-		chip8->pc += 4;
-	else
 		chip8->pc += 2;
+	chip8->pc += 2;
 }
 
 /* Sets VX to the value of the delay timer. */
