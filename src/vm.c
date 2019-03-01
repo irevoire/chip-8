@@ -217,6 +217,14 @@ static void chip8_handle_opcode(chip8_t *chip8)
 	}
 }
 
+/* Decode the instruction */
+#define OP ((chip8->opcode & 0xF000) >> 12)
+#define OP_NNN (chip8->opcode & 0x0FFF)
+#define OP_NN (chip8->opcode & 0x00FF)
+#define OP_N (chip8->opcode & 0x000F)
+#define OP_X ((chip8->opcode & 0x0F00) >> 8)
+#define OP_Y ((chip8->opcode & 0x00F0) >> 4)
+
 /* Clears the screen. */
 static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode)
 {
@@ -252,7 +260,7 @@ static void chip8_opcode_0NNN(chip8_t *chip8, uint16_t *opcode)
 /* Jumps to address NNN. */
 static void chip8_opcode_1NNN(chip8_t *chip8, uint16_t *opcode)
 {
-	chip8->pc = *opcode & 0x0FFF;
+	chip8->pc = OP_NNN;
 }
 
 /* Calls subroutine at NNN. */
@@ -262,13 +270,13 @@ static void chip8_opcode_2NNN(chip8_t *chip8, uint16_t *opcode)
 	chip8->stack[chip8->sp] = chip8->pc;
 	chip8->sp++; // Increment stack pointer
 	// Set the program counter to the address at NNN
-	chip8->pc = *opcode & 0x0FFF;
+	chip8->pc = OP_NNN;
 }
 
 /* Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode)
 {
-	if(chip8->V[(*opcode & 0x0F00) >> 8] == (*opcode & 0x00FF))
+	if(chip8->V[OP_X] == OP_NN)
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -276,7 +284,7 @@ static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode)
 /* Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode)
 {
-	if(chip8->V[(*opcode & 0x0F00) >> 8] != (*opcode & 0x00FF))
+	if(chip8->V[OP_X] != OP_NN)
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -284,8 +292,7 @@ static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode)
 /* Skips the next instruction if VX equals VY. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode)
 {
-	if(chip8->V[(*opcode & 0x0F00) >> 8] // VX
-			== chip8->V[(*opcode & 0x00F0) >> 4]) // VY
+	if(chip8->V[OP_X] == chip8->V[OP_Y])
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -293,127 +300,99 @@ static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode)
 /* Sets VX to NN. */
 static void chip8_opcode_6XNN(chip8_t *chip8, uint16_t *opcode)
 {
-	chip8->V[(*opcode & 0x0F00) >> 8] = *opcode & 0x00FF;
+	chip8->V[OP_X] = OP_NN;
 	chip8->pc += 2;
 }
 
 /* Adds NN to VX. (Carry flag is not changed) */
 static void chip8_opcode_7XNN(chip8_t *chip8, uint16_t *opcode)
 {
-	chip8->V[(*opcode & 0x0F00) >> 8] += *opcode & 0x00FF;
+	chip8->V[OP_X] += OP_NN;
 	chip8->pc += 2;
 }
 
 /* Sets VX to the value of VY. */
 static void chip8_opcode_8XY0(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	chip8->V[X] = chip8->V[Y];
+	chip8->V[OP_X] = chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX or VY. (Bitwise OR operation) */
 static void chip8_opcode_8XY1(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	chip8->V[X] |= chip8->V[Y];
+	chip8->V[OP_X] |= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX and VY. (Bitwise AND operation) */
 static void chip8_opcode_8XY2(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	chip8->V[X] &= chip8->V[Y];
+	chip8->V[OP_X] &= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX xor VY. */
 static void chip8_opcode_8XY3(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	chip8->V[X] ^= chip8->V[Y];
+	chip8->V[OP_X] ^= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. */
 static void chip8_opcode_8XY4(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	if(chip8->V[Y] > (0xFF - chip8->V[X]))
+	if(chip8->V[OP_Y] > (0xFF - chip8->V[OP_X]))
 		chip8->V[0xF] = 1; //carry
 	else
 		chip8->V[0xF] = 0;
-	chip8->V[X] += chip8->V[Y];
+	chip8->V[OP_X] += chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't. */
 static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	if(chip8->V[Y] > chip8->V[X])
+	if(chip8->V[OP_Y] > chip8->V[OP_X])
 		chip8->V[0xF] = 1; // there is a borrow
 	else
 		chip8->V[0xF] = 0;
-	chip8->V[X] -= chip8->V[Y];
+	chip8->V[OP_X] -= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Stores the least significant bit of VX in VF and then shifts VX to the right by 1. */
 static void chip8_opcode_8XY6(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->V[0xF] = chip8->V[X] & 0x1;
-	chip8->V[X] >>= 1;
+	chip8->V[0xF] = chip8->V[OP_X] & 0x1;
+	chip8->V[OP_X] >>= 1;
 	chip8->pc += 2;
 }
 
 /* Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't. */
 static void chip8_opcode_8XY7(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	if(chip8->V[X] > chip8->V[Y])
+	if(chip8->V[OP_X] > chip8->V[OP_Y])
 		chip8->V[0xF] = 1;
 	else
 		chip8->V[0xF] = 0;
 
-	chip8->V[X] = chip8->V[Y] - chip8->V[X];
+	chip8->V[OP_X] = chip8->V[OP_Y] - chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Stores the most significant bit of VX in VF and then shifts VX to the left by 1. */
 static void chip8_opcode_8XYE(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->V[0xF] = chip8->V[X] >> 7;
-	chip8->V[X] <<= 1;
+	chip8->V[0xF] = chip8->V[OP_X] >> 7;
+	chip8->V[OP_X] <<= 1;
 	chip8->pc += 2;
 }
 
 /* Skips the next instruction if VX doesn't equal VY. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-	unsigned char Y = (*opcode & 0x00F0) >> 4;
-
-	if(chip8->V[X] != chip8->V[Y])
+	if(chip8->V[OP_X] != chip8->V[OP_Y])
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -421,30 +400,28 @@ static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
 // Sets I to the address NNN
 static void chip8_opcode_ANNN(chip8_t *chip8, uint16_t *opcode)
 {
-	chip8->I = *opcode & 0x0FFF;
+	chip8->I = OP_NNN;
 	chip8->pc += 2;
 }
 
 /* Jumps to the address NNN plus V0. */
 static void chip8_opcode_BNNN(chip8_t *chip8, uint16_t *opcode)
 {
-	chip8->pc = (*opcode & 0x0FFF) + chip8->V[0];
+	chip8->pc = OP_NNN + chip8->V[0];
 }
 
 /* Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. */
 static void chip8_opcode_CXNN(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->V[X] = (rand() % 0xFF) & (*opcode & 0x00FF);
+	chip8->V[OP_X] = (rand() % 0xFF) & OP_NN;
 	chip8->pc += 2;
 }
 
 /* Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen */
 static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = chip8->V[(*opcode & 0x0F00) >> 8];
-	unsigned char Y = chip8->V[(*opcode & 0x00F0) >> 4];
+	unsigned char X = chip8->V[OP_X];
+	unsigned char Y = chip8->V[OP_Y];
 	uint16_t height = *opcode & 0x000F;
 	uint16_t pixel;
 
@@ -469,9 +446,7 @@ static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 /* Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	if(chip8->key[chip8->V[X]] != 0)
+	if(chip8->key[chip8->V[OP_X]] != 0)
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -479,9 +454,7 @@ static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
 /* Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block) */
 static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	if(chip8->key[chip8->V[X]] == 0)
+	if(chip8->key[chip8->V[OP_X]] == 0)
 		chip8->pc += 2;
 	chip8->pc += 2;
 }
@@ -489,24 +462,20 @@ static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
 /* Sets VX to the value of the delay timer. */
 static void chip8_opcode_FX07(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->V[X] = chip8->delay_timer;
+	chip8->V[OP_X] = chip8->delay_timer;
 	chip8->pc += 2;
 }
 
 /* A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) */
 static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
 	char key_pressed = 0;
 
 	for(unsigned char i = 0; i < 16; i++)
 	{
 		if(chip8->key[i] != 0)
 		{
-			chip8->V[X] = i;
+			chip8->V[OP_X] = i;
 			key_pressed = 1;
 		}
 	}
@@ -521,74 +490,60 @@ static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
 /* Sets the delay timer to VX. */
 static void chip8_opcode_FX15(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->delay_timer = chip8->V[X];
+	chip8->delay_timer = chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Sets the sound timer to VX. */
 static void chip8_opcode_FX18(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->sound_timer = chip8->V[X];
+	chip8->sound_timer = chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Adds VX to I. */
 static void chip8_opcode_FX1E(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	if(chip8->I + chip8->V[X] > 0xFFF)
+	if(chip8->I + chip8->V[OP_X] > 0xFFF)
 		chip8->V[0xF] = 1;
 	else
 		chip8->V[0xF] = 0;
-	chip8->I += chip8->V[X];
+	chip8->I += chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. */
 static void chip8_opcode_FX29(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->I = chip8->V[X] * 0x5;
+	chip8->I = chip8->V[OP_X] * 0x5;
 	chip8->pc += 2;
 }
 
 /* Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.) */
 static void chip8_opcode_FX33(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	chip8->memory[chip8->I]     = chip8->V[X] / 100;
-	chip8->memory[chip8->I + 1] = (chip8->V[X] / 10) % 10;
-	chip8->memory[chip8->I + 2] = chip8->V[X] % 10;
+	chip8->memory[chip8->I]     = chip8->V[OP_X] / 100;
+	chip8->memory[chip8->I + 1] = (chip8->V[OP_X] / 10) % 10;
+	chip8->memory[chip8->I + 2] = chip8->V[OP_X] % 10;
 	chip8->pc += 2;
 }
 
 /* Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. */
 static void chip8_opcode_FX55(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	for (unsigned char i = 0; i <= X; i++)
+	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->memory[chip8->I + i] = chip8->V[i];	
 
-	chip8->I += X + 1; // useless ?
+	chip8->I += OP_X + 1; // useless ?
 	chip8->pc += 2;
 }
 
 /* Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. */
 static void chip8_opcode_FX65(chip8_t *chip8, uint16_t *opcode)
 {
-	unsigned char X = (*opcode & 0x0F00) >> 8;
-
-	for (unsigned char i = 0; i <= X; i++)
+	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->V[i] = chip8->memory[chip8->I + i];
 
-	chip8->I += X + 1; // useless ?
+	chip8->I += OP_X + 1; // useless ?
 	chip8->pc += 2;
 }
