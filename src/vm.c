@@ -97,122 +97,123 @@ int chip8_emulate_cycle(chip8_t *chip8)
 	return 0;
 }
 
-static void chip8_opcode_0NNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_00EE(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_1NNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_2NNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_6XNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_7XNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY0(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY1(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY2(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY3(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY4(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY6(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XY7(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_8XYE(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_ANNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_BNNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_CXNN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX07(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX15(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX18(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX1E(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX29(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX33(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX55(chip8_t *chip8, uint16_t *opcode);
-static void chip8_opcode_FX65(chip8_t *chip8, uint16_t *opcode);
+static void chip8_opcode_0NNN(chip8_t *chip8);
+static void chip8_opcode_00E0(chip8_t *chip8);
+static void chip8_opcode_00EE(chip8_t *chip8);
+static void chip8_opcode_1NNN(chip8_t *chip8);
+static void chip8_opcode_2NNN(chip8_t *chip8);
+static void chip8_opcode_3XNN(chip8_t *chip8);
+static void chip8_opcode_4XNN(chip8_t *chip8);
+static void chip8_opcode_5XY0(chip8_t *chip8);
+static void chip8_opcode_6XNN(chip8_t *chip8);
+static void chip8_opcode_7XNN(chip8_t *chip8);
+static void chip8_opcode_8XY0(chip8_t *chip8);
+static void chip8_opcode_8XY1(chip8_t *chip8);
+static void chip8_opcode_8XY2(chip8_t *chip8);
+static void chip8_opcode_8XY3(chip8_t *chip8);
+static void chip8_opcode_8XY4(chip8_t *chip8);
+static void chip8_opcode_8XY5(chip8_t *chip8);
+static void chip8_opcode_8XY6(chip8_t *chip8);
+static void chip8_opcode_8XY7(chip8_t *chip8);
+static void chip8_opcode_8XYE(chip8_t *chip8);
+static void chip8_opcode_9XY0(chip8_t *chip8);
+static void chip8_opcode_ANNN(chip8_t *chip8);
+static void chip8_opcode_BNNN(chip8_t *chip8);
+static void chip8_opcode_CXNN(chip8_t *chip8);
+static void chip8_opcode_DXYN(chip8_t *chip8);
+static void chip8_opcode_EX9E(chip8_t *chip8);
+static void chip8_opcode_EXA1(chip8_t *chip8);
+static void chip8_opcode_FX07(chip8_t *chip8);
+static void chip8_opcode_FX0A(chip8_t *chip8);
+static void chip8_opcode_FX15(chip8_t *chip8);
+static void chip8_opcode_FX18(chip8_t *chip8);
+static void chip8_opcode_FX1E(chip8_t *chip8);
+static void chip8_opcode_FX29(chip8_t *chip8);
+static void chip8_opcode_FX33(chip8_t *chip8);
+static void chip8_opcode_FX55(chip8_t *chip8);
+static void chip8_opcode_FX65(chip8_t *chip8);
 
 static void chip8_handle_opcode(chip8_t *chip8)
 {
-	uint16_t *opcode = &chip8->opcode;
+	uint16_t opcode;
+
 	// get the current opcode
+	chip8->opcode = (uint16_t) (chip8->memory[chip8->pc] << 8 | chip8->memory[chip8->pc + 1]);
+	opcode = chip8->opcode;
 
-	*opcode = (uint16_t) (chip8->memory[chip8->pc] << 8 | chip8->memory[chip8->pc + 1]);
-
-	if (*opcode == 0x00EE)
-		chip8_opcode_00EE(chip8, opcode);
-	else if (*opcode == 0x00E0)
-		chip8_opcode_00E0(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x0000)
-		chip8_opcode_0NNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x1000)
-		chip8_opcode_1NNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x2000)
-		chip8_opcode_2NNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x3000)
-		chip8_opcode_3XNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x4000)
-		chip8_opcode_4XNN(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x5000)
-		chip8_opcode_5XY0(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x6000)
-		chip8_opcode_6XNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0x7000)
-		chip8_opcode_7XNN(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8000)
-		chip8_opcode_8XY0(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8001)
-		chip8_opcode_8XY1(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8002)
-		chip8_opcode_8XY2(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8003)
-		chip8_opcode_8XY3(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8004)
-		chip8_opcode_8XY4(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8005)
-		chip8_opcode_8XY5(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8006)
-		chip8_opcode_8XY6(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x8007)
-		chip8_opcode_8XY7(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x800E)
-		chip8_opcode_8XYE(chip8, opcode);
-	else if ((*opcode & 0xF00F) == 0x9000)
-		chip8_opcode_9XY0(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0xA000)
-		chip8_opcode_ANNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0xB000)
-		chip8_opcode_BNNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0xC000)
-		chip8_opcode_CXNN(chip8, opcode);
-	else if ((*opcode & 0xF000) == 0xD000)
-		chip8_opcode_DXYN(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xE09E)
-		chip8_opcode_EX9E(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xE0A1)
-		chip8_opcode_EXA1(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF007)
-		chip8_opcode_FX07(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF00A)
-		chip8_opcode_FX0A(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF015)
-		chip8_opcode_FX15(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF018)
-		chip8_opcode_FX18(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF01E)
-		chip8_opcode_FX1E(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF029)
-		chip8_opcode_FX29(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF033)
-		chip8_opcode_FX33(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF055)
-		chip8_opcode_FX55(chip8, opcode);
-	else if ((*opcode & 0xF0FF) == 0xF065)
-		chip8_opcode_FX65(chip8, opcode);
+	if (opcode == 0x00EE)
+		chip8_opcode_00EE(chip8);
+	else if (opcode == 0x00E0)
+		chip8_opcode_00E0(chip8);
+	else if ((opcode & 0xF000) == 0x0000)
+		chip8_opcode_0NNN(chip8);
+	else if ((opcode & 0xF000) == 0x1000)
+		chip8_opcode_1NNN(chip8);
+	else if ((opcode & 0xF000) == 0x2000)
+		chip8_opcode_2NNN(chip8);
+	else if ((opcode & 0xF000) == 0x3000)
+		chip8_opcode_3XNN(chip8);
+	else if ((opcode & 0xF000) == 0x4000)
+		chip8_opcode_4XNN(chip8);
+	else if ((opcode & 0xF00F) == 0x5000)
+		chip8_opcode_5XY0(chip8);
+	else if ((opcode & 0xF000) == 0x6000)
+		chip8_opcode_6XNN(chip8);
+	else if ((opcode & 0xF000) == 0x7000)
+		chip8_opcode_7XNN(chip8);
+	else if ((opcode & 0xF00F) == 0x8000)
+		chip8_opcode_8XY0(chip8);
+	else if ((opcode & 0xF00F) == 0x8001)
+		chip8_opcode_8XY1(chip8);
+	else if ((opcode & 0xF00F) == 0x8002)
+		chip8_opcode_8XY2(chip8);
+	else if ((opcode & 0xF00F) == 0x8003)
+		chip8_opcode_8XY3(chip8);
+	else if ((opcode & 0xF00F) == 0x8004)
+		chip8_opcode_8XY4(chip8);
+	else if ((opcode & 0xF00F) == 0x8005)
+		chip8_opcode_8XY5(chip8);
+	else if ((opcode & 0xF00F) == 0x8006)
+		chip8_opcode_8XY6(chip8);
+	else if ((opcode & 0xF00F) == 0x8007)
+		chip8_opcode_8XY7(chip8);
+	else if ((opcode & 0xF00F) == 0x800E)
+		chip8_opcode_8XYE(chip8);
+	else if ((opcode & 0xF00F) == 0x9000)
+		chip8_opcode_9XY0(chip8);
+	else if ((opcode & 0xF000) == 0xA000)
+		chip8_opcode_ANNN(chip8);
+	else if ((opcode & 0xF000) == 0xB000)
+		chip8_opcode_BNNN(chip8);
+	else if ((opcode & 0xF000) == 0xC000)
+		chip8_opcode_CXNN(chip8);
+	else if ((opcode & 0xF000) == 0xD000)
+		chip8_opcode_DXYN(chip8);
+	else if ((opcode & 0xF0FF) == 0xE09E)
+		chip8_opcode_EX9E(chip8);
+	else if ((opcode & 0xF0FF) == 0xE0A1)
+		chip8_opcode_EXA1(chip8);
+	else if ((opcode & 0xF0FF) == 0xF007)
+		chip8_opcode_FX07(chip8);
+	else if ((opcode & 0xF0FF) == 0xF00A)
+		chip8_opcode_FX0A(chip8);
+	else if ((opcode & 0xF0FF) == 0xF015)
+		chip8_opcode_FX15(chip8);
+	else if ((opcode & 0xF0FF) == 0xF018)
+		chip8_opcode_FX18(chip8);
+	else if ((opcode & 0xF0FF) == 0xF01E)
+		chip8_opcode_FX1E(chip8);
+	else if ((opcode & 0xF0FF) == 0xF029)
+		chip8_opcode_FX29(chip8);
+	else if ((opcode & 0xF0FF) == 0xF033)
+		chip8_opcode_FX33(chip8);
+	else if ((opcode & 0xF0FF) == 0xF055)
+		chip8_opcode_FX55(chip8);
+	else if ((opcode & 0xF0FF) == 0xF065)
+		chip8_opcode_FX65(chip8);
 	else
 	{
-		printf("Unknown opcode: 0x%.4X\n", *opcode);
+		printf("Unknown opcode: 0x%.4X\n", opcode);
 		exit(1);
 	}
 }
@@ -226,11 +227,8 @@ static void chip8_handle_opcode(chip8_t *chip8)
 #define OP_Y ((chip8->opcode & 0x00F0) >> 4)
 
 /* Clears the screen. */
-static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_00E0(chip8_t *chip8)
 {
-	// remove ununsed parameters warnings
-	(void) opcode;
-
 	memset(chip8->gfx, 0, sizeof(chip8->gfx));
 
 	window_clear(chip8->window);
@@ -238,33 +236,27 @@ static void chip8_opcode_00E0(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Returns from a subroutine. */
-static void chip8_opcode_00EE(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_00EE(chip8_t *chip8)
 {
-	// remove ununsed parameters warnings
-	(void) opcode;
-
 	chip8->sp--;
 	chip8->pc = chip8->stack[chip8->sp];
 	chip8->pc += 2;
 }
 
 /* Calls RCA 1802 program at address NNN. Not necessary for most ROMs. */
-static void chip8_opcode_0NNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_0NNN(chip8_t *chip8)
 {
-	// remove ununsed parameters warnings
-	(void) opcode;
-
 	chip8->pc += 2;
 }
 
 /* Jumps to address NNN. */
-static void chip8_opcode_1NNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_1NNN(chip8_t *chip8)
 {
 	chip8->pc = OP_NNN;
 }
 
 /* Calls subroutine at NNN. */
-static void chip8_opcode_2NNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_2NNN(chip8_t *chip8)
 {
 	// Store current address in stack
 	chip8->stack[chip8->sp] = chip8->pc;
@@ -274,7 +266,7 @@ static void chip8_opcode_2NNN(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_3XNN(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] == OP_NN)
 		chip8->pc += 2;
@@ -282,7 +274,7 @@ static void chip8_opcode_3XNN(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_4XNN(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] != OP_NN)
 		chip8->pc += 2;
@@ -290,7 +282,7 @@ static void chip8_opcode_4XNN(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if VX equals VY. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_5XY0(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] == chip8->V[OP_Y])
 		chip8->pc += 2;
@@ -298,49 +290,49 @@ static void chip8_opcode_5XY0(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Sets VX to NN. */
-static void chip8_opcode_6XNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_6XNN(chip8_t *chip8)
 {
 	chip8->V[OP_X] = OP_NN;
 	chip8->pc += 2;
 }
 
 /* Adds NN to VX. (Carry flag is not changed) */
-static void chip8_opcode_7XNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_7XNN(chip8_t *chip8)
 {
 	chip8->V[OP_X] += OP_NN;
 	chip8->pc += 2;
 }
 
 /* Sets VX to the value of VY. */
-static void chip8_opcode_8XY0(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY0(chip8_t *chip8)
 {
 	chip8->V[OP_X] = chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX or VY. (Bitwise OR operation) */
-static void chip8_opcode_8XY1(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY1(chip8_t *chip8)
 {
 	chip8->V[OP_X] |= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX and VY. (Bitwise AND operation) */
-static void chip8_opcode_8XY2(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY2(chip8_t *chip8)
 {
 	chip8->V[OP_X] &= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Sets VX to VX xor VY. */
-static void chip8_opcode_8XY3(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY3(chip8_t *chip8)
 {
 	chip8->V[OP_X] ^= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
 
 /* Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. */
-static void chip8_opcode_8XY4(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY4(chip8_t *chip8)
 {
 	if(chip8->V[OP_Y] > (0xFF - chip8->V[OP_X]))
 		chip8->V[0xF] = 1; //carry
@@ -351,7 +343,7 @@ static void chip8_opcode_8XY4(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't. */
-static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY5(chip8_t *chip8)
 {
 	if(chip8->V[OP_Y] > chip8->V[OP_X])
 		chip8->V[0xF] = 1; // there is a borrow
@@ -362,7 +354,7 @@ static void chip8_opcode_8XY5(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Stores the least significant bit of VX in VF and then shifts VX to the right by 1. */
-static void chip8_opcode_8XY6(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY6(chip8_t *chip8)
 {
 	chip8->V[0xF] = chip8->V[OP_X] & 0x1;
 	chip8->V[OP_X] >>= 1;
@@ -370,7 +362,7 @@ static void chip8_opcode_8XY6(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't. */
-static void chip8_opcode_8XY7(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XY7(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] > chip8->V[OP_Y])
 		chip8->V[0xF] = 1;
@@ -382,7 +374,7 @@ static void chip8_opcode_8XY7(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Stores the most significant bit of VX in VF and then shifts VX to the left by 1. */
-static void chip8_opcode_8XYE(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_8XYE(chip8_t *chip8)
 {
 	chip8->V[0xF] = chip8->V[OP_X] >> 7;
 	chip8->V[OP_X] <<= 1;
@@ -390,7 +382,7 @@ static void chip8_opcode_8XYE(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if VX doesn't equal VY. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_9XY0(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] != chip8->V[OP_Y])
 		chip8->pc += 2;
@@ -398,31 +390,31 @@ static void chip8_opcode_9XY0(chip8_t *chip8, uint16_t *opcode)
 }
 
 // Sets I to the address NNN
-static void chip8_opcode_ANNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_ANNN(chip8_t *chip8)
 {
 	chip8->I = OP_NNN;
 	chip8->pc += 2;
 }
 
 /* Jumps to the address NNN plus V0. */
-static void chip8_opcode_BNNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_BNNN(chip8_t *chip8)
 {
 	chip8->pc = OP_NNN + chip8->V[0];
 }
 
 /* Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. */
-static void chip8_opcode_CXNN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_CXNN(chip8_t *chip8)
 {
 	chip8->V[OP_X] = (rand() % 0xFF) & OP_NN;
 	chip8->pc += 2;
 }
 
 /* Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen */
-static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_DXYN(chip8_t *chip8)
 {
 	unsigned char X = chip8->V[OP_X];
 	unsigned char Y = chip8->V[OP_Y];
-	uint16_t height = *opcode & 0x000F;
+	uint16_t height = OP_N;
 	uint16_t pixel;
 
 	chip8->V[0xF] = 0;
@@ -444,7 +436,7 @@ static void chip8_opcode_DXYN(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_EX9E(chip8_t *chip8)
 {
 	if(chip8->key[chip8->V[OP_X]] != 0)
 		chip8->pc += 2;
@@ -452,7 +444,7 @@ static void chip8_opcode_EX9E(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block) */
-static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_EXA1(chip8_t *chip8)
 {
 	if(chip8->key[chip8->V[OP_X]] == 0)
 		chip8->pc += 2;
@@ -460,14 +452,14 @@ static void chip8_opcode_EXA1(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Sets VX to the value of the delay timer. */
-static void chip8_opcode_FX07(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX07(chip8_t *chip8)
 {
 	chip8->V[OP_X] = chip8->delay_timer;
 	chip8->pc += 2;
 }
 
 /* A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) */
-static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX0A(chip8_t *chip8)
 {
 	char key_pressed = 0;
 
@@ -488,21 +480,21 @@ static void chip8_opcode_FX0A(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Sets the delay timer to VX. */
-static void chip8_opcode_FX15(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX15(chip8_t *chip8)
 {
 	chip8->delay_timer = chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Sets the sound timer to VX. */
-static void chip8_opcode_FX18(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX18(chip8_t *chip8)
 {
 	chip8->sound_timer = chip8->V[OP_X];
 	chip8->pc += 2;
 }
 
 /* Adds VX to I. */
-static void chip8_opcode_FX1E(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX1E(chip8_t *chip8)
 {
 	if(chip8->I + chip8->V[OP_X] > 0xFFF)
 		chip8->V[0xF] = 1;
@@ -513,14 +505,14 @@ static void chip8_opcode_FX1E(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. */
-static void chip8_opcode_FX29(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX29(chip8_t *chip8)
 {
 	chip8->I = chip8->V[OP_X] * 0x5;
 	chip8->pc += 2;
 }
 
 /* Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.) */
-static void chip8_opcode_FX33(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX33(chip8_t *chip8)
 {
 	chip8->memory[chip8->I]     = chip8->V[OP_X] / 100;
 	chip8->memory[chip8->I + 1] = (chip8->V[OP_X] / 10) % 10;
@@ -529,7 +521,7 @@ static void chip8_opcode_FX33(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. */
-static void chip8_opcode_FX55(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX55(chip8_t *chip8)
 {
 	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->memory[chip8->I + i] = chip8->V[i];	
@@ -539,7 +531,7 @@ static void chip8_opcode_FX55(chip8_t *chip8, uint16_t *opcode)
 }
 
 /* Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. */
-static void chip8_opcode_FX65(chip8_t *chip8, uint16_t *opcode)
+static void chip8_opcode_FX65(chip8_t *chip8)
 {
 	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->V[i] = chip8->memory[chip8->I + i];
