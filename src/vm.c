@@ -334,11 +334,12 @@ static void chip8_opcode_8XY3(chip8_t *chip8)
 /* Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. */
 static void chip8_opcode_8XY4(chip8_t *chip8)
 {
-	if(chip8->V[OP_Y] > (0xFF - chip8->V[OP_X]))
-		chip8->V[0xF] = 1; //carry
-	else
-		chip8->V[0xF] = 0;
-	chip8->V[OP_X] += chip8->V[OP_Y];
+	unsigned short sum = chip8->V[OP_X] + chip8->V[OP_Y];
+
+	if(sum > 0xFF) chip8->V[0xF] = 1;
+	else chip8->V[0xF] = 0;
+
+	chip8->V[OP_X] = (unsigned char)sum;
 	chip8->pc += 2;
 }
 
@@ -346,9 +347,9 @@ static void chip8_opcode_8XY4(chip8_t *chip8)
 static void chip8_opcode_8XY5(chip8_t *chip8)
 {
 	if(chip8->V[OP_Y] > chip8->V[OP_X])
-		chip8->V[0xF] = 1; // there is a borrow
+		chip8->V[0xF] = 0; // there is a borrow
 	else
-		chip8->V[0xF] = 0;
+		chip8->V[0xF] = 1;
 	chip8->V[OP_X] -= chip8->V[OP_Y];
 	chip8->pc += 2;
 }
@@ -365,9 +366,9 @@ static void chip8_opcode_8XY6(chip8_t *chip8)
 static void chip8_opcode_8XY7(chip8_t *chip8)
 {
 	if(chip8->V[OP_X] > chip8->V[OP_Y])
-		chip8->V[0xF] = 1;
-	else
 		chip8->V[0xF] = 0;
+	else
+		chip8->V[0xF] = 1;
 
 	chip8->V[OP_X] = chip8->V[OP_Y] - chip8->V[OP_X];
 	chip8->pc += 2;
@@ -496,10 +497,10 @@ static void chip8_opcode_FX18(chip8_t *chip8)
 /* Adds VX to I. */
 static void chip8_opcode_FX1E(chip8_t *chip8)
 {
-	if(chip8->I + chip8->V[OP_X] > 0xFFF)
-		chip8->V[0xF] = 1;
-	else
-		chip8->V[0xF] = 0;
+	unsigned short sum = chip8->I + chip8->V[0xF];
+	if(sum > 0xFFF) chip8->V[0xF] = 1;
+	else chip8->V[0xF] = 0;
+
 	chip8->I += chip8->V[OP_X];
 	chip8->pc += 2;
 }
