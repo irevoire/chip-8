@@ -527,7 +527,6 @@ static void chip8_opcode_FX55(chip8_t *chip8)
 	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->memory[chip8->I + i] = chip8->V[i];	
 
-	chip8->I += OP_X + 1; // useless ?
 	chip8->pc += 2;
 }
 
@@ -537,6 +536,5 @@ static void chip8_opcode_FX65(chip8_t *chip8)
 	for (unsigned char i = 0; i <= OP_X; i++)
 		chip8->V[i] = chip8->memory[chip8->I + i];
 
-	chip8->I += OP_X + 1; // useless ?
 	chip8->pc += 2;
 }
